@@ -4,7 +4,7 @@ from setuptools import find_packages
 
 setup(
     name='dmonroy.web',
-    version='0.1.1',
+    version='0.1.2',
     namespace_packages=['dmonroy'],
     packages=find_packages(),
     include_package_data=True,

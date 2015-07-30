@@ -1,10 +1,7 @@
-from aiohttp import test_utils, client, request
-import asyncio
+from aiohttp import request
 from dmonroy import web
 from dmonroy.web.test import WebTestCase, asynctest
-import logging
 
-logging.basicConfig(level=logging.DEBUG)
 
 class MultiView(web.View):
 

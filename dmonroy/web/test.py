@@ -42,7 +42,7 @@ class WebTestCase(unittest.TestCase):
     @asyncio.coroutine
     def create_server(self):
         if hasattr(self, 'port'):
-            return  # noqa
+            return  # pragma: no cover
 
         app = getattr(self, 'app')
         assert app is not None, 'Application not initialized'

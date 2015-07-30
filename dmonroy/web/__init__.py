@@ -5,10 +5,11 @@ import os
 from .application import Application
 from .response import JSONResponse, Response, HTMLResponse, JavaScriptResponse
 from .view import View
+from .resource import Resource
 
 
 @asyncio.coroutine
-def init(loop, cls, routes, *args, **kwargs):
+def init(loop, cls, routes, *args, **kwargs): # pragma: no cover
 
     app = cls(*args, loop=loop, routes=routes, **kwargs)
 
@@ -20,7 +21,7 @@ def init(loop, cls, routes, *args, **kwargs):
     return srv
 
 
-def run(cls, routes, *args, **kwargs):
+def run(cls, routes, *args, **kwargs): # pragma: no cover
     """
     Run a web application.
 

@@ -13,10 +13,11 @@ class FruitResource(web.Resource):
             colors=['red', 'pink']
         ),
     )
+
     def index(self):
         return web.JSONResponse(self.fruits)
 
-    def view(self, id):
+    def show(self, id):
         if id not in self.fruits:
             raise HTTPNotFound()
 
@@ -45,3 +46,17 @@ class TestWeb(WebTestCase):
         )
 
         self.assertEqual(resp.status, 200)
+
+    @asynctest
+    def test_show(self):
+        resp = yield from request(
+            'GET', self.full_url('/fruit/orange'), loop=self.loop
+        )
+
+        self.assertEqual(resp.status, 200)
+
+        resp2 = yield from request(
+            'GET', self.full_url('/fruit/mango'), loop=self.loop
+        )
+
+        self.assertEqual(resp2.status, 404)

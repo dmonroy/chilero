@@ -5,8 +5,7 @@ from dmonroy.web.test import WebTestCase, asynctest
 
 class MultiView(web.View):
 
-    def get(self):
-        t = self.request.match_info.get('type')
+    def get(self, type):
 
         types = dict(
             plain=lambda: web.Response('Hello world!'),
@@ -15,7 +14,7 @@ class MultiView(web.View):
             javascript=lambda: web.JavaScriptResponse('// hello world!'),
         )
 
-        return types.get(t, 'plain')()
+        return types.get(type, 'plain')()
 
 
 class TestWeb(WebTestCase):

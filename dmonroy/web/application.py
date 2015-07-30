@@ -9,7 +9,10 @@ from dmonroy.web.resource import Resource
 def dispatcher(cls, method):
     @asyncio.coroutine
     def f(request, *args, **kwargs):
-        return getattr(cls(request, *args, **kwargs), method)()
+        vkwargs = dict()
+        for k in request.match_info.keys():
+            vkwargs[k] = request.match_info.get(k)
+        return getattr(cls(request, *args, **kwargs), method)(**vkwargs)
 
     return f
 

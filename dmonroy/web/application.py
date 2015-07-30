@@ -1,7 +1,7 @@
 import os
 
 import asyncio
-from aiohttp import web
+from aiohttp import hdrs, web
 from aiohttp.web_urldispatcher import UrlDispatcher
 from dmonroy.web.resource import Resource
 
@@ -29,40 +29,38 @@ class Application(web.Application):
         if issubclass(view, Resource):
             # Add resource actions as urls
 
-            if callable(getattr(view, 'index', None)):
-                already_registered.append('get')
-                self.router.add_route(
-                    'get',
-                    pattern,
-                    dispatcher(view, 'index'),
-                    *route[2:]
+            object_pattern = r'%s' % os.path.join(pattern, view.id_pattern)
+
+            patterns = {
+                # Collection's actions to HTTP methods mapping
+                pattern: dict(
+                    index=[hdrs.METH_GET],
+                    new=[hdrs.METH_POST, hdrs.METH_PUT],
+                ),
+                # Element's actions to HTTP methods mapping
+                object_pattern: dict(
+                    show=[hdrs.METH_GET],
+                    update=[hdrs.METH_PUT, hdrs.METH_PATCH],
+                    destroy=[hdrs.METH_DELETE]
                 )
 
-            if callable(getattr(view, 'new', None)):
-                for method in ['post', 'put']:
-                    already_registered.append(method)
-                    self.router.add_route(
-                        method,
-                        pattern,
-                        dispatcher(view, 'new'),
-                        *route[2:]
-                    )
+            }
 
-            object_pattern = os.path.join(pattern, view.id_pattern)
-
-            if callable(getattr(view, 'update', None)):
-                self.router.add_route(
-                    'put',
-                    object_pattern,
-                    dispatcher(view, 'put'),
-                    *route[2:]
-                )
+            for pt, actions in patterns.items():
+                for action, methods in actions.items():
+                    if callable(getattr(view, action, None)):
+                        for method in methods:
+                            already_registered.append((pt, method.lower()))
+                            self.router.add_route(
+                                method, pt, dispatcher(view, action),
+                                *route[2:]
+                            )
 
         # HTTP methods as lowercase view methods
         for method in UrlDispatcher.METHODS:
 
             # Do not bind the same method twice
-            if method in already_registered:  # pragma: no cover
+            if (pattern, method) in already_registered:  # pragma: no cover
                 continue
 
             if callable(getattr(view, method.lower(), None)):

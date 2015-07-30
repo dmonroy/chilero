@@ -52,9 +52,9 @@ class Application(web.Application):
 
             if callable(getattr(view, 'update', None)):
                 self.router.add_route(
-                    'patch',
+                    'put',
                     object_pattern,
-                    dispatcher(view, 'update'),
+                    dispatcher(view, 'put'),
                     *route[2:]
                 )
 

@@ -1,8 +1,8 @@
 import aiohttp
 from aiohttp.web_exceptions import HTTPNotFound
 import json
-from dmonroy import web
-from dmonroy.web.test import WebTestCase, asynctest
+from chilero import web
+from chilero.web.test import WebTestCase, asynctest
 
 fruits = dict(
     orange=dict(

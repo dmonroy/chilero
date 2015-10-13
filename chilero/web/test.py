@@ -4,7 +4,7 @@ from functools import wraps
 
 import asyncio
 from aiohttp import log
-from dmonroy import web
+from chilero import web
 
 
 def asynctest(f):

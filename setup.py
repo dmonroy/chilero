@@ -3,16 +3,16 @@ from distutils.core import setup
 from setuptools import find_packages
 
 setup(
-    name='dmonroy.web',
+    name='chilero',
     version='0.1.3',
-    namespace_packages=['dmonroy'],
+    namespace_packages=['chilero'],
     packages=find_packages(),
     include_package_data=True,
-    url='https://github.com/dmonroy/dmonroy.web',
+    url='https://github.com/dmonroy/chilero',
     author='Darwin Monroy',
     author_email='contact@darwinmonroy.com',
-    description='A micro framework!',
+    description='A micro framework... A la Tortrix!',
     install_requires=[
-        'aiohttp>=0.16.6',
+        'aiohttp>=0.17.4',
     ]
 )

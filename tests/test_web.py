@@ -1,6 +1,6 @@
 from aiohttp import request
-from dmonroy import web
-from dmonroy.web.test import WebTestCase, asynctest
+from chilero import web
+from chilero.web.test import WebTestCase, asynctest
 
 
 class MultiView(web.View):

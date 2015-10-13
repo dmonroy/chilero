@@ -3,7 +3,7 @@ import os
 import asyncio
 from aiohttp import hdrs, web
 from aiohttp.web_urldispatcher import UrlDispatcher
-from dmonroy.web.resource import Resource
+from chilero.web.resource import Resource
 
 
 def dispatcher(cls, method):

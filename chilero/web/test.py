@@ -30,7 +30,7 @@ class WebTestCase(unittest.TestCase):
 
         @asyncio.coroutine
         def go():
-            self.app = self.application(self.routes)
+            self.app = self.application(self.routes, loop=self.loop)
             yield from self.create_server()
 
         self.loop.run_until_complete(go())

@@ -6,17 +6,6 @@ from aiohttp.web_urldispatcher import UrlDispatcher
 from chilero.web.resource import Resource
 
 
-def dispatcher(cls, method):
-    @asyncio.coroutine
-    def f(request, *args, **kwargs):
-        vkwargs = dict()
-        for k in request.match_info.keys():
-            vkwargs[k] = request.match_info.get(k)
-        return getattr(cls(request, *args, **kwargs), method)(**vkwargs)
-
-    return f
-
-
 class Application(web.Application):
 
     def __init__(self, routes=None, **kwargs):
@@ -24,6 +13,18 @@ class Application(web.Application):
 
         for route in routes or []:
             self.register_routes(route)
+
+    def dispatcher(self, cls, method):
+        @asyncio.coroutine
+        def f(request, *args, **kwargs):
+            vkwargs = dict()
+            for k in request.match_info.keys():
+                vkwargs[k] = request.match_info.get(k)
+            return getattr(
+                cls(request, self, *args, **kwargs), method
+            )(**vkwargs)
+
+        return f
 
     def register_routes(self, route):
         pattern = route[0]
@@ -55,7 +56,7 @@ class Application(web.Application):
                         for method in methods:
                             already_registered.append((pt, method.lower()))
                             self.router.add_route(
-                                method, pt, dispatcher(view, action),
+                                method, pt, self.dispatcher(view, action),
                                 *route[2:]
                             )
 
@@ -70,6 +71,6 @@ class Application(web.Application):
                 self.router.add_route(
                     method,
                     pattern,
-                    dispatcher(view, method.lower()),
+                    self.dispatcher(view, method.lower()),
                     *route[2:]
                     )

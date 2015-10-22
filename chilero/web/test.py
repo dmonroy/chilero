@@ -1,8 +1,8 @@
+import asyncio
 import socket
 import unittest
 from functools import wraps
 
-import asyncio
 from aiohttp import log
 from chilero import web
 

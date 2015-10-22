@@ -1,6 +1,6 @@
+import asyncio
 import os
 
-import asyncio
 from aiohttp import hdrs, web
 from aiohttp.web_urldispatcher import UrlDispatcher
 from chilero.web.resource import Resource

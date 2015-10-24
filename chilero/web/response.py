@@ -4,9 +4,9 @@ from aiohttp import web
 
 
 class Response(web.Response):
-    def __init__(self, body, **kwargs):
+    def __init__(self, body=None, **kwargs):
         super(Response, self).__init__(
-            body=body.encode('utf-8'), **kwargs
+            body=body.encode('utf-8') if body is not None else body, **kwargs
         )
 
 

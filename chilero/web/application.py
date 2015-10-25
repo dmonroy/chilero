@@ -84,15 +84,14 @@ class Application(web.Application):
             # HTTP methods as lowercase view methods
             for method in UrlDispatcher.METHODS:
 
-                # Do not bind the same method twice
-                if (pattern, method) in already_registered:  # pragma: no cover
-                    continue
+                if callable(getattr(view, method.lower(), None)) \
+                        and not (pattern, method) in already_registered:
+                    # Do not bind the same method twice
 
-                if callable(getattr(view, method.lower(), None)):
                     name = url_name
 
-                    if (name, pattern) in name_already_registered:  # pragma: no cover
-                        name = None
+                    if (name, pattern) in name_already_registered:
+                        name = None  # pragma: no cover
                     else:
                         name_already_registered.append((name, pattern))
 

@@ -34,7 +34,9 @@ class TestWeb(WebTestCase):
 
         for t in types.keys():
             resp = yield from request(
-                'GET', self.full_url('/{}'.format(t)), loop=self.loop
+                'GET',
+                self.full_url(self.app.reverse('multiview', type=t)),
+                loop=self.loop
             )
 
             self.assertEqual(resp.status, 200)

@@ -14,6 +14,7 @@ fruits = dict(
 )
 
 class FruitResource(web.Resource):
+    resource_name = 'fruit'
 
     def index(self):
         return web.JSONResponse(fruits)
@@ -48,7 +49,9 @@ class TestResource(WebTestCase):
 
     @asynctest
     def test_index(self):
-        resp = yield from aiohttp.get(self.full_url('/fruit'))
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_index'))
+        )
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
@@ -58,14 +61,19 @@ class TestResource(WebTestCase):
 
     @asynctest
     def test_show(self):
-        resp = yield from aiohttp.get(self.full_url('/fruit/orange'))
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_item', id='orange'))
+        )
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
         self.assertEqual(jr, dict(colors=['orange', 'yellow', 'green']))
         resp.close()
 
-        resp2 = yield from aiohttp.get(self.full_url('/fruit/mango'))
+        resp2 = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_item', id='mango'))
+        )
+
 
         self.assertEqual(resp2.status, 404)
         resp2.close()
@@ -74,14 +82,16 @@ class TestResource(WebTestCase):
     def test_new(self):
 
         resp = yield from aiohttp.post(
-            self.full_url('/fruit'),
+            self.full_url(self.app.reverse('fruit_index')),
             data=json.dumps(dict(name='apple', colors=['red', 'green'])),
         )
 
         self.assertEqual(resp.status, 200)
 
         resp.close()
-        resp = yield from aiohttp.get(self.full_url('/fruit/apple'))
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_item', id='apple'))
+        )
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
@@ -92,14 +102,16 @@ class TestResource(WebTestCase):
     def test_update(self):
 
         resp = yield from aiohttp.post(
-            self.full_url('/fruit'),
+            self.full_url(self.app.reverse('fruit_index')),
             data=json.dumps(dict(name='pear', colors=['green'])),
         )
 
         self.assertEqual(resp.status, 200)
         resp.close()
 
-        resp = yield from aiohttp.get(self.full_url('/fruit/pear'))
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_item', id='pear'))
+        )
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
@@ -107,14 +119,16 @@ class TestResource(WebTestCase):
         resp.close()
 
         resp = yield from aiohttp.put(
-            self.full_url('/fruit/pear'),
+            self.full_url(self.app.reverse('fruit_item', id='pear')),
             data=json.dumps(dict(colors=['green', 'yellow'])),
         )
 
         self.assertEqual(resp.status, 200)
         resp.close()
 
-        resp = yield from aiohttp.get(self.full_url('/fruit/pear'))
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_item', id='pear'))
+        )
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
@@ -125,26 +139,32 @@ class TestResource(WebTestCase):
     def test_delete(self):
 
         resp = yield from aiohttp.post(
-            self.full_url('/fruit'),
+            self.full_url(self.app.reverse('fruit_index')),
             data=json.dumps(dict(name='grape', colors=['purple'])),
         )
 
         self.assertEqual(resp.status, 200)
         resp.close()
 
-        resp = yield from aiohttp.get(self.full_url('/fruit/grape'))
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_item', id='grape'))
+        )
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
         self.assertEqual(jr, dict(colors=['purple']))
         resp.close()
 
-        resp = yield from aiohttp.delete(self.full_url('/fruit/grape'))
+        resp = yield from aiohttp.delete(
+            self.full_url(self.app.reverse('fruit_item', id='grape'))
+        )
 
         self.assertEqual(resp.status, 200)
         resp.close()
 
-        resp = yield from aiohttp.get(self.full_url('/fruit/grape'))
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_item', id='grape'))
+        )
 
         self.assertEqual(resp.status, 404)
         resp.close()

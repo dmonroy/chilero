@@ -29,9 +29,17 @@ class Application(web.Application):
     def register_routes(self, route):
         pattern = route[0]
         view = route[1]
+
         already_registered = []
+        name_already_registered = []
         if issubclass(view, Resource):
             # Add resource actions as urls
+
+            url_name = route[2] \
+                if len(route) == 3 \
+                else view.resource_name \
+                if hasattr(view, 'resource_name') \
+                else view.__name__.lower()
 
             object_pattern = r'%s' % os.path.join(pattern, view.id_pattern)
 
@@ -55,22 +63,49 @@ class Application(web.Application):
                     if callable(getattr(view, action, None)):
                         for method in methods:
                             already_registered.append((pt, method.lower()))
+                            name = '{}_{}'.format(
+                                url_name, 'index' if pt == pattern else 'item'
+                            )
+                            if (name, pt) in name_already_registered:
+                                name = None
+                            else:
+                                name_already_registered.append((name, pt))
                             self.router.add_route(
                                 method, pt, self.dispatcher(view, action),
-                                *route[2:]
+                                name=name
                             )
 
-        # HTTP methods as lowercase view methods
-        for method in UrlDispatcher.METHODS:
+        else:
+            # Its a basic view
+            url_name = route[2] \
+                if len(route) == 3 \
+                else view.__name__.lower()
 
-            # Do not bind the same method twice
-            if (pattern, method) in already_registered:  # pragma: no cover
-                continue
+            # HTTP methods as lowercase view methods
+            for method in UrlDispatcher.METHODS:
 
-            if callable(getattr(view, method.lower(), None)):
-                self.router.add_route(
-                    method,
-                    pattern,
-                    self.dispatcher(view, method.lower()),
-                    *route[2:]
-                    )
+                # Do not bind the same method twice
+                if (pattern, method) in already_registered:  # pragma: no cover
+                    continue
+
+                if callable(getattr(view, method.lower(), None)):
+                    name = url_name
+
+                    if (name, pattern) in name_already_registered:  # pragma: no cover
+                        name = None
+                    else:
+                        name_already_registered.append((name, pattern))
+
+                    self.router.add_route(
+                        method,
+                        pattern,
+                        self.dispatcher(view, method.lower()),
+                        name=name
+                        )
+
+    def reverse(self, name, query=None, **kwargs):
+        assert name in self.router, "Url '{}' doesn't exists!".format(name)
+        if kwargs:
+            return self.router[name].url(parts=kwargs, query=query)
+        else:
+            return self.router[name].url(query=query)

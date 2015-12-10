@@ -13,6 +13,6 @@ setup(
     author_email='contact@darwinmonroy.com',
     description='A micro framework... A la Tortrix!',
     install_requires=[
-        'aiohttp>=0.17.4',
+        'aiohttp>=0.19',
     ]
 )

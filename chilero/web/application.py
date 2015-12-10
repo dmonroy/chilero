@@ -43,6 +43,33 @@ class Application(web.Application):
 
             object_pattern = r'%s' % os.path.join(pattern, view.id_pattern)
 
+            # Nested resources
+            for nkey, nview in (
+                    view.nested_collection_resources or {}
+            ).items():
+                self.register_routes(
+                    [
+                        os.path.join(
+                            pattern if pattern != '/' else '',
+                            nkey
+                        ),
+                        nview
+                    ]
+                )
+
+            for nkey, nview in (view.nested_entity_resources or {}).items():
+                self.register_routes(
+                    [
+                        os.path.join(
+                            object_pattern.replace(
+                                '{id}', '{%s_id}' % url_name
+                            ),
+                            nkey
+                        ),
+                        nview
+                    ]
+                )
+
             patterns = {
                 # Collection's actions to HTTP methods mapping
                 pattern: dict(

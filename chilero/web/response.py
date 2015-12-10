@@ -23,7 +23,7 @@ class JSONResponse(Response):
 
     def __init__(self, data, **kwargs):
         super(JSONResponse, self).__init__(
-            body=json.dumps(data), content_type='text/json', **kwargs
+            body=json.dumps(data, indent=4), content_type='text/json', **kwargs
         )
 
 

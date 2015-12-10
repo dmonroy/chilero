@@ -13,23 +13,43 @@ fruits = dict(
     ),
 )
 
+class GlobalStatsResource(web.Resource):
+    def index(self):
+        return self.response(
+            dict(
+                count=fruits.__len__()
+            )
+        )
+
+class SingleStatsResource(web.Resource):
+    def index(self, fruit_id):
+        return self.response(
+            dict(
+                count=fruits[fruit_id]['colors'].__len__()
+            )
+        )
+
 class FruitResource(web.Resource):
     resource_name = 'fruit'
 
+    nested_collection_resources = dict(
+        stats=GlobalStatsResource
+    )
+    nested_entity_resources = dict(
+        stats=SingleStatsResource
+    )
+
     def index(self):
         response = dict(
-            url=self.get_index_url(),
             fruits=fruits
         )
-        return web.JSONResponse(response)
+        return self.response(response)
 
     def show(self, id):
         if id not in fruits:
             raise HTTPNotFound()
 
-        response = fruits[id].copy()
-        response['url'] = self.get_object_url(id)
-        return web.JSONResponse(response)
+        return self.response(fruits[id])
 
     def new(self):
         data = yield from self.request.json()
@@ -62,7 +82,7 @@ class TestResource(WebTestCase):
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
         self.assertEqual(jr['fruits'], fruits)
-        self.assertTrue(jr['url'].endswith('/fruit'))
+        self.assertTrue(jr['self'].endswith('/fruit'))
         resp.close()
 
 
@@ -74,11 +94,11 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
-        url = jr.pop('url')
-        self.assertEqual(jr, dict(colors=['orange', 'yellow', 'green']))
+
+        self.assertEqual(jr['body'], dict(colors=['orange', 'yellow', 'green']))
         resp.close()
 
-        self.assertTrue(url.endswith('/fruit/orange'))
+        self.assertTrue(jr['self'].endswith('/fruit/orange'))
 
         resp2 = yield from aiohttp.get(
             self.full_url(self.app.reverse('fruit_item', id='mango'))
@@ -104,8 +124,7 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
-        jr.pop('url')
-        self.assertEqual(jr, dict(colors=['red', 'green']))
+        self.assertEqual(jr['body'], dict(colors=['red', 'green']))
         resp.close()
 
     @asynctest
@@ -125,8 +144,7 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
-        jr.pop('url')
-        self.assertEqual(jr, dict(colors=['green']))
+        self.assertEqual(jr['body'], dict(colors=['green']))
         resp.close()
 
         resp = yield from aiohttp.put(
@@ -143,8 +161,7 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
-        jr.pop('url')
-        self.assertEqual(jr, dict(colors=['green', 'yellow']))
+        self.assertEqual(jr['body'], dict(colors=['green', 'yellow']))
         resp.close()
 
     @asynctest
@@ -165,9 +182,7 @@ class TestResource(WebTestCase):
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
 
-        jr.pop('url')
-
-        self.assertEqual(jr, dict(colors=['purple']))
+        self.assertEqual(jr['body'], dict(colors=['purple']))
         resp.close()
 
         resp = yield from aiohttp.delete(

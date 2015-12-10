@@ -17,13 +17,19 @@ class FruitResource(web.Resource):
     resource_name = 'fruit'
 
     def index(self):
-        return web.JSONResponse(fruits)
+        response = dict(
+            url=self.get_index_url(),
+            fruits=fruits
+        )
+        return web.JSONResponse(response)
 
     def show(self, id):
         if id not in fruits:
             raise HTTPNotFound()
 
-        return web.JSONResponse(fruits[id])
+        response = fruits[id].copy()
+        response['url'] = self.get_object_url(id)
+        return web.JSONResponse(response)
 
     def new(self):
         data = yield from self.request.json()
@@ -55,9 +61,10 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
-        self.assertEqual(set(jr.keys()), {'orange', 'strawberry'})
-
+        self.assertEqual(jr['fruits'], fruits)
+        self.assertTrue(jr['url'].endswith('/fruit'))
         resp.close()
+
 
     @asynctest
     def test_show(self):
@@ -67,13 +74,15 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
+        url = jr.pop('url')
         self.assertEqual(jr, dict(colors=['orange', 'yellow', 'green']))
         resp.close()
+
+        self.assertTrue(url.endswith('/fruit/orange'))
 
         resp2 = yield from aiohttp.get(
             self.full_url(self.app.reverse('fruit_item', id='mango'))
         )
-
 
         self.assertEqual(resp2.status, 404)
         resp2.close()
@@ -95,6 +104,7 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
+        jr.pop('url')
         self.assertEqual(jr, dict(colors=['red', 'green']))
         resp.close()
 
@@ -115,6 +125,7 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
+        jr.pop('url')
         self.assertEqual(jr, dict(colors=['green']))
         resp.close()
 
@@ -132,6 +143,7 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
+        jr.pop('url')
         self.assertEqual(jr, dict(colors=['green', 'yellow']))
         resp.close()
 
@@ -152,6 +164,9 @@ class TestResource(WebTestCase):
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
+
+        jr.pop('url')
+
         self.assertEqual(jr, dict(colors=['purple']))
         resp.close()
 

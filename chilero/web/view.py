@@ -4,3 +4,8 @@ class View(object):
         self.app = app
         self.args = args
         self.kwargs = kwargs
+
+    def get_full_url(self, path):
+        return '{}://{}{}'.format(
+            self.request.scheme, self.request.host, path
+        )

@@ -30,6 +30,10 @@ class Application(web.Application):
         pattern = route[0]
         view = route[1]
 
+        # remove trailing slash
+        if pattern.endswith('/') and len(pattern) > 1:
+            pattern = pattern[:-1]
+
         already_registered = []
         name_already_registered = []
         if issubclass(view, Resource):

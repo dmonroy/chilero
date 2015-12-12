@@ -34,8 +34,6 @@ class Application(web.Application):
         if pattern.endswith('/') and len(pattern) > 1:
             pattern = pattern[:-1]
 
-        already_registered = []
-        name_already_registered = []
         if issubclass(view, Resource):
             # Add resource actions as urls
 
@@ -93,14 +91,12 @@ class Application(web.Application):
                 for action, methods in actions.items():
                     if callable(getattr(view, action, None)):
                         for method in methods:
-                            already_registered.append((pt, method.lower()))
                             name = '{}_{}'.format(
                                 url_name, 'index' if pt == pattern else 'item'
                             )
-                            if (name, pt) in name_already_registered:
+                            if name in self.router:
                                 name = None
-                            else:
-                                name_already_registered.append((name, pt))
+
                             self.router.add_route(
                                 method, pt, self.dispatcher(view, action),
                                 name=name
@@ -115,23 +111,20 @@ class Application(web.Application):
             # HTTP methods as lowercase view methods
             for method in UrlDispatcher.METHODS:
 
-                if callable(getattr(view, method.lower(), None)) \
-                        and not (pattern, method) in already_registered:
+                if callable(getattr(view, method.lower(), None)):
                     # Do not bind the same method twice
 
                     name = url_name
 
-                    if (name, pattern) in name_already_registered:
+                    if name in self.router:
                         name = None  # pragma: no cover
-                    else:
-                        name_already_registered.append((name, pattern))
 
                     self.router.add_route(
                         method,
                         pattern,
                         self.dispatcher(view, method.lower()),
                         name=name
-                        )
+                    )
 
     def reverse(self, name, query=None, **kwargs):
         assert name in self.router, "Url '{}' doesn't exists!".format(name)

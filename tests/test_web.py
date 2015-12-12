@@ -3,6 +3,11 @@ from chilero import web
 from chilero.web.test import WebTestCase, asynctest
 
 
+class HelloView(web.View):
+
+    def get(self):
+        return web.Response('Hello world!')
+
 class MultiView(web.View):
 
     def get(self, type):
@@ -19,11 +24,22 @@ class MultiView(web.View):
 
 class TestWeb(WebTestCase):
     routes = [
+        ['/hello/', HelloView],
         ['/{type}', MultiView]
     ]
 
     @asynctest
-    def test_view(self):
+    def test_hello_view(self):
+
+        resp = yield from request(
+            'GET',self.full_url('/hello'),loop=self.loop
+        )
+        print(dir(resp))
+        self.assertEqual(resp.status, 200)
+
+
+    @asynctest
+    def test_multi_view(self):
 
         types = dict(
             plain=[None, 'Hello world!'],

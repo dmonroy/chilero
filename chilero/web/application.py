@@ -94,8 +94,8 @@ class Application(web.Application):
                             name = '{}_{}'.format(
                                 url_name, 'index' if pt == pattern else 'item'
                             )
-                            if name in self.router:
-                                name = None
+
+                            name = None if name in self.router else name
 
                             self.router.add_route(
                                 method, pt, self.dispatcher(view, action),
@@ -116,8 +116,7 @@ class Application(web.Application):
 
                     name = url_name
 
-                    if name in self.router:
-                        name = None  # pragma: no cover
+                    name = None if name in self.router else url_name
 
                     self.router.add_route(
                         method,

@@ -47,6 +47,9 @@ class Resource(View):
                 self.request.match_info.get('id', None), resource
             )
 
+    def get_encoder_class(self):
+        return getattr(self, 'encoder_class', None)
+
     def is_entity(self):
         """
         Hacky solution to detect if current instance of the class is an entity
@@ -96,7 +99,9 @@ class ResourceResponse(JSONResponse):
         if extra_content is not None:
             data.update(extra_content)
 
-        super(ResourceResponse, self).__init__(data, **kwargs)
+        super(ResourceResponse, self).__init__(
+            data, cls=resource.get_encoder_class(), **kwargs
+        )
 
 
 class CollectionResponse(ResourceResponse):

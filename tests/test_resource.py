@@ -39,6 +39,10 @@ class FruitResource(web.Resource):
         stats=SingleStatsResource
     )
 
+    definition = dict(
+        description='A long description of the resource'
+    )
+
     def index(self):
         response = dict(
             fruits=fruits
@@ -72,6 +76,18 @@ class TestResource(WebTestCase):
     routes = [
         ['/fruit', FruitResource]
     ]
+
+    @asynctest
+    def test_definition(self):
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('fruit_definition'))
+        )
+
+        self.assertEqual(resp.status, 200)
+        jr = yield from resp.json()
+
+        self.assertEqual(jr['description'], 'A long description of the resource')
+        resp.close()
 
     @asynctest
     def test_index(self):

@@ -4,6 +4,7 @@ import os
 from aiohttp import hdrs, web
 from aiohttp.web_urldispatcher import UrlDispatcher
 from chilero.web.resource import Resource
+from chilero.web.response import JSONResponse
 
 
 class Application(web.Application):
@@ -26,6 +27,13 @@ class Application(web.Application):
 
         return f
 
+    def definition_dispatcher(self, cls):
+        @asyncio.coroutine
+        def f(request, *args, **kwargs):
+            return JSONResponse(cls.definition)
+
+        return f
+
     def register_routes(self, route):
         pattern = route[0]
         view = route[1]
@@ -44,6 +52,22 @@ class Application(web.Application):
                 else view.__name__.lower()
 
             object_pattern = r'%s' % os.path.join(pattern, view.id_pattern)
+
+            definition_url_name = '{}_definition'.format(url_name)
+            if hasattr(view, 'definition') \
+                    and definition_url_name not in self.router:
+
+                definition_pattern = r'{}'.format(
+                    os.path.join(pattern, '+definition')
+                )
+                self.router.add_route(
+                    'GET',
+                    definition_pattern,
+                    self.definition_dispatcher(
+                        view
+                    ),
+                    name=definition_url_name
+                )
 
             # Nested resources
             for nkey, nview in (

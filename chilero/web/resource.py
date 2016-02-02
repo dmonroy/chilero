@@ -33,6 +33,14 @@ class Resource(View):
             )
         )
 
+    def get_definition_url(self, resource=None, **kwargs):
+        return self.get_full_url(
+            self.app.reverse(
+                '{}_definition'.format(resource or self.get_resource_name()),
+                **kwargs
+            )
+        )
+
     def get_object_url(self, id, resource=None):
         return self.get_full_url(
             self.app.reverse(
@@ -98,6 +106,9 @@ class ResourceResponse(JSONResponse):
 
         if extra_content is not None:
             data.update(extra_content)
+
+        if hasattr(resource, 'definition'):
+            data['definition'] = resource.get_definition_url()
 
         super(ResourceResponse, self).__init__(
             data, cls=resource.get_encoder_class(), **kwargs

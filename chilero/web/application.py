@@ -30,7 +30,8 @@ class Application(web.Application):
     def definition_dispatcher(self, cls):
         @asyncio.coroutine
         def f(request, *args, **kwargs):
-            return JSONResponse(cls.definition)
+            headers = (('Access-Control-Allow-Origin', '*'),)
+            return JSONResponse(cls.definition, headers=headers)
 
         return f
 

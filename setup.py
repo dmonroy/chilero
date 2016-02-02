@@ -4,7 +4,7 @@ from setuptools import find_packages
 
 setup(
     name='chilero',
-    version='0.3.0',
+    version='0.3.1',
     namespace_packages=['chilero'],
     packages=find_packages(),
     include_package_data=True,

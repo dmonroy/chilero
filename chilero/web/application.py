@@ -2,7 +2,7 @@ import asyncio
 import os
 
 from aiohttp import hdrs, web
-from aiohttp.web_urldispatcher import UrlDispatcher
+from aiohttp.web_urldispatcher import AbstractRoute
 from chilero.web.resource import Resource
 from chilero.web.response import JSONResponse
 
@@ -134,8 +134,7 @@ class Application(web.Application):
                 else view.__name__.lower()
 
             # HTTP methods as lowercase view methods
-            for method in UrlDispatcher.METHODS:
-
+            for method in AbstractRoute.METHODS:
                 if callable(getattr(view, method.lower(), None)):
                     # Do not bind the same method twice
 

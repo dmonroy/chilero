@@ -25,26 +25,55 @@ class Resource(View):
             if hasattr(self, 'resource_name') \
             else self.__class__.__name__.lower()
 
+    def default_kwargs_for_urls(self):
+        """
+        Default keyword arguments for building the resource's urls.
+
+        :return: dict
+        """
+        return {}
+
     def get_index_url(self, resource=None, **kwargs):
+        """
+        Builds the url of the resource's index.
+
+        :param resource: name of the resource or None
+        :param kwargs: additional keyword arguments to build the url
+        :return: url of the resource's index
+        """
+        default_kwargs = self.default_kwargs_for_urls() \
+            if resource is None else {}
+        default_kwargs.update(kwargs)
+
         return self.get_full_url(
             self.app.reverse(
                 '{}_index'.format(resource or self.get_resource_name()),
-                **kwargs
+                **default_kwargs
             )
         )
 
     def get_definition_url(self, resource=None, **kwargs):
+        default_kwargs = self.default_kwargs_for_urls() \
+            if resource is None else {}
+        default_kwargs.update(kwargs)
+
         return self.get_full_url(
             self.app.reverse(
                 '{}_definition'.format(resource or self.get_resource_name()),
-                **kwargs
+                **default_kwargs
             )
         )
 
-    def get_object_url(self, id, resource=None):
+    def get_object_url(self, id, resource=None, **kwargs):
+        default_kwargs = self.default_kwargs_for_urls() \
+            if resource is None else {}
+        default_kwargs.update(kwargs)
+
         return self.get_full_url(
             self.app.reverse(
-                '{}_item'.format(resource or self.get_resource_name()), id=id
+                '{}_item'.format(resource or self.get_resource_name()),
+                id=id,
+                **default_kwargs
             )
         )
 

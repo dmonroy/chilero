@@ -24,13 +24,17 @@ class WebTestCase(unittest.TestCase):
     application = web.Application
     routes = []
 
+    @asyncio.coroutine
+    def initialize_application(self):
+        return self.application(self.routes, loop=self.loop)
+
     def setUp(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
 
         @asyncio.coroutine
         def go():
-            self.app = self.application(self.routes, loop=self.loop)
+            self.app = yield from self.initialize_application()
             yield from self.create_server()
 
         self.loop.run_until_complete(go())

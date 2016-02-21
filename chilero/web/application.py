@@ -102,12 +102,14 @@ class Application(web.Application):
                 pattern: dict(
                     index=[hdrs.METH_GET],
                     new=[hdrs.METH_POST, hdrs.METH_PUT],
+                    collection_options=[hdrs.METH_OPTIONS]
                 ),
                 # Element's actions to HTTP methods mapping
                 object_pattern: dict(
                     show=[hdrs.METH_GET],
                     update=[hdrs.METH_PUT, hdrs.METH_PATCH],
-                    destroy=[hdrs.METH_DELETE]
+                    destroy=[hdrs.METH_DELETE],
+                    entity_options=[hdrs.METH_OPTIONS]
                 )
 
             }

@@ -15,14 +15,14 @@ class Application(web.Application):
         for route in routes or []:
             self.register_routes(route)
 
-    def dispatcher(self, cls, method):
+    def dispatcher(self, cls, method, parent=None):
         @asyncio.coroutine
         def f(request, *args, **kwargs):
             vkwargs = dict()
             for k in request.match_info.keys():
                 vkwargs[k] = request.match_info.get(k)
             return getattr(
-                cls(request, self, *args, **kwargs), method
+                cls(request, self, *args, parent=parent, **kwargs), method
             )(**vkwargs)
 
         return f
@@ -35,7 +35,7 @@ class Application(web.Application):
 
         return f
 
-    def register_routes(self, route):
+    def register_routes(self, route, parent=None):
         pattern = route[0]
         view = route[1]
 
@@ -81,7 +81,7 @@ class Application(web.Application):
                             nkey
                         ),
                         nview
-                    ]
+                    ], parent='{}_index'.format(url_name)
                 )
 
             for nkey, nview in (view.nested_entity_resources or {}).items():
@@ -94,7 +94,7 @@ class Application(web.Application):
                             nkey
                         ),
                         nview
-                    ]
+                    ], parent='{}_item'.format(url_name)
                 )
 
             patterns = {
@@ -125,7 +125,9 @@ class Application(web.Application):
                             name = None if name in self.router else name
 
                             self.router.add_route(
-                                method, pt, self.dispatcher(view, action),
+                                method, pt, self.dispatcher(
+                                    view, action, parent=parent
+                                ),
                                 name=name
                             )
 

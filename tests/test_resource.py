@@ -22,6 +22,11 @@ class GlobalStatsResource(web.Resource):
         )
 
 class SingleStatsResource(web.Resource):
+    def default_kwargs_for_urls(self):
+        return dict(
+            fruit_id=self.request.match_info['fruit_id']
+        )
+
     def index(self, fruit_id):
         return self.response(
             dict(
@@ -215,5 +220,23 @@ class TestResource(WebTestCase):
         self.assertEqual(resp.status, 404)
         resp.close()
 
+    @asynctest
+    def test_parent_url(self):
+        resp = yield from aiohttp.get(
+            self.full_url(
+                self.app.reverse('singlestatsresource_index', fruit_id='orange')
+            )
+        )
 
+        j = yield from resp.json()
+        resp.close()
+        assert j['parent'].endswith('/fruit/orange')
 
+        resp2 = yield from aiohttp.get(
+            self.full_url(
+                self.app.reverse('globalstatsresource_index')
+            )
+        )
+        j2 = yield from resp2.json()
+        resp2.close()
+        assert j2['parent'].endswith('/fruit')

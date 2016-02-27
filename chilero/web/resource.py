@@ -14,6 +14,10 @@ class Resource(View):
     nested_collection_resources = None
     nested_entity_resources = None
 
+    def __init__(self, *args, **kwargs):
+        self._parent = kwargs.pop('parent') if 'parent' in kwargs else None
+        super(Resource, self).__init__(*args, **kwargs)
+
     def response(self, *args, **kwargs):
         if self.is_entity():
             return EntityResponse(self, *args, **kwargs)
@@ -42,7 +46,8 @@ class Resource(View):
         :return: url of the resource's index
         """
         default_kwargs = self.default_kwargs_for_urls() \
-            if resource is None else {}
+            if resource == self.get_resource_name() else {}
+
         default_kwargs.update(kwargs)
 
         return self.get_full_url(
@@ -121,6 +126,23 @@ class Resource(View):
             for k, c in self.get_nested_resources().items()
         }
 
+    def get_parent(self):
+        """Returns the url to the parent endpoint."""
+        if self.is_entity():
+            return self.get_index_url()
+        elif self._parent is not None:
+            resource = self._parent.rsplit('_', 1)[0]
+            parts = self.default_kwargs_for_urls()
+
+            if '{}_id'.format(resource) in parts:
+                id = parts.pop('{}_id'.format(resource))
+                parts['id'] = id
+            return self.get_full_url(
+                self.app.reverse(
+                    self._parent, **parts
+                )
+            )
+
 
 class ResourceResponse(JSONResponse):
 
@@ -138,6 +160,8 @@ class ResourceResponse(JSONResponse):
 
         if hasattr(resource, 'definition'):
             data['definition'] = resource.get_definition_url()
+
+        data['parent'] = resource.get_parent() or None
 
         super(ResourceResponse, self).__init__(
             data, cls=resource.get_encoder_class(), **kwargs

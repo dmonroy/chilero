@@ -121,8 +121,19 @@ class Resource(View):
             id = current_args.pop('id')
             current_args['{}_id'.format(self.get_resource_name())] = id
 
+        def _nested_url(k, c):
+            if isinstance(c, Resource):
+                return self.get_index_url(c.__name__.lower(), **current_args)
+
+            return self.get_full_url(
+                self.app.reverse(
+                    '{}'.format(c.__name__.lower()),
+                    **current_args
+                )
+            )
+
         return {
-            k: self.get_index_url(c.__name__.lower(), **current_args)
+            k: _nested_url(k, c)
             for k, c in self.get_nested_resources().items()
         }
 

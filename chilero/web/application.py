@@ -1,5 +1,6 @@
 import asyncio
 import os
+from functools import wraps
 
 from aiohttp import hdrs, web
 from aiohttp.web_urldispatcher import AbstractRoute
@@ -16,6 +17,7 @@ class Application(web.Application):
             self.register_routes(route)
 
     def dispatcher(self, cls, method, parent=None):
+        @wraps(getattr(cls, method))
         @asyncio.coroutine
         def f(request, *args, **kwargs):
             vkwargs = dict()

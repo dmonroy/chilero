@@ -1,6 +1,9 @@
 # flake8: noqa
 import asyncio
 import os
+import logging
+
+import aiohttp.web
 
 from .application import Application
 from .response import JSONResponse, Response, HTMLResponse, JavaScriptResponse
@@ -8,17 +11,15 @@ from .view import View
 from .resource import Resource
 
 
-@asyncio.coroutine
-def init(loop, cls, routes, *args, **kwargs): # pragma: no cover
+def init(cls, routes, *args, **kwargs): # pragma: no cover
+    if 'loglevel' in kwargs:
+        loglevel = kwargs.pop('loglevel')
+    else:
+        loglevel = logging.INFO
 
-    app = cls(*args, loop=loop, routes=routes, **kwargs)
-
-    HOST = os.getenv('HOST', '0.0.0.0')
-    PORT = os.getenv('PORT', 8000)
-
-    srv = yield from loop.create_server(app.make_handler(), HOST, PORT)
-
-    return srv
+    logging.basicConfig(level=loglevel)
+    app = cls(*args, routes=routes, **kwargs)
+    return app
 
 
 def run(cls, routes, *args, **kwargs): # pragma: no cover
@@ -31,12 +32,12 @@ def run(cls, routes, *args, **kwargs): # pragma: no cover
     :param kwargs: additional keyword arguments
     :return: None
     """
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(init(loop, cls, routes, *args, **kwargs))
 
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt as e:
-        loop.close()
+    app = init(cls, routes, *args, **kwargs)
 
-    print('Process finished.')
+    HOST = os.getenv('HOST', '0.0.0.0')
+    PORT = os.getenv('PORT', 8000)
+
+    aiohttp.web.run_app(app, port=PORT, host=HOST)
+
+

@@ -13,6 +13,14 @@ fruits = dict(
     ),
 )
 
+class ViewBasedStats(web.View):
+    def get(self):
+        return web.JSONResponse(
+            dict(
+                count=fruits.__len__()
+            )
+        )
+
 class GlobalStatsResource(web.Resource):
     def index(self):
         return self.response(
@@ -38,7 +46,8 @@ class FruitResource(web.Resource):
     resource_name = 'fruit'
 
     nested_collection_resources = dict(
-        stats=GlobalStatsResource
+        stats=GlobalStatsResource,
+        stats2=ViewBasedStats
     )
     nested_entity_resources = dict(
         stats=SingleStatsResource
@@ -240,3 +249,12 @@ class TestResource(WebTestCase):
         j2 = yield from resp2.json()
         resp2.close()
         assert j2['parent'].endswith('/fruit')
+
+        resp2 = yield from aiohttp.get(
+            self.full_url(
+                self.app.reverse('viewbasedstats')
+            )
+        )
+        j2 = yield from resp2.json()
+        resp2.close()
+        assert j2['count'] == 3

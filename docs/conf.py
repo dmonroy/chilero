@@ -35,7 +35,6 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
-    'sphinx.ext.imgmath',
     'sphinx.ext.githubpages',
 ]
 
@@ -57,8 +56,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Chilero'
-copyright = '2016, Chilero'
-author = 'Chilero'
+copyright = '2016, Darwin Monroy'
+author = 'Darwin Monroy'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -48,8 +48,10 @@ class Application(web.Application):
             object_pattern = r'%s' % os.path.join(pattern, view.id_pattern)
 
             definition_url_name = '{}_definition'.format(url_name)
-            if hasattr(view, 'definition') \
-                    and definition_url_name not in self.router:
+            if definition_url_name not in self.router and (
+                    hasattr(view, 'definition') or
+                    hasattr(view, 'get_definition')
+                    ):
 
                 definition_pattern = r'{}'.format(
                     os.path.join(pattern, '+definition')

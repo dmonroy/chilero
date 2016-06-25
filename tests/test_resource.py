@@ -13,6 +13,16 @@ fruits = dict(
     ),
 )
 
+veggies = dict(
+    cucumber=dict(
+        colors=['green']
+    ),
+    beet=dict(
+        colors=['purple']
+    ),
+)
+
+
 class ViewBasedStats(web.View):
     def get(self):
         return web.JSONResponse(
@@ -21,6 +31,7 @@ class ViewBasedStats(web.View):
             )
         )
 
+
 class GlobalStatsResource(web.Resource):
     def index(self):
         return self.response(
@@ -28,6 +39,7 @@ class GlobalStatsResource(web.Resource):
                 count=fruits.__len__()
             )
         )
+
 
 class SingleStatsResource(web.Resource):
     def default_kwargs_for_urls(self):
@@ -41,6 +53,7 @@ class SingleStatsResource(web.Resource):
                 count=fruits[fruit_id]['colors'].__len__()
             )
         )
+
 
 class FruitResource(web.Resource):
     resource_name = 'fruit'
@@ -86,13 +99,35 @@ class FruitResource(web.Resource):
         return web.JSONResponse(None)
 
 
+class VeggiesResource(web.Resource):
+    resource_name = 'veggies'
+
+    def get_definition(self):
+        return dict(
+            description='A HTTP resource of veggies'
+        )
+
+    def index(self):
+        response = dict(
+            veggies=veggies
+        )
+        return self.response(response)
+
+    def show(self, id):
+        if id not in veggies:
+            raise HTTPNotFound()
+
+        return self.response(veggies[id])
+
+
 class TestResource(WebTestCase):
     routes = [
-        ['/fruit', FruitResource]
+        ['/fruit', FruitResource],
+        ['/veggies', VeggiesResource]
     ]
 
     @asynctest
-    def test_definition(self):
+    def test_definition_from_property(self):
         resp = yield from aiohttp.get(
             self.full_url(self.app.reverse('fruit_definition'))
         )
@@ -101,6 +136,18 @@ class TestResource(WebTestCase):
         jr = yield from resp.json()
 
         self.assertEqual(jr['description'], 'A long description of the resource')
+        resp.close()
+
+    @asynctest
+    def test_definition_from_method(self):
+        resp = yield from aiohttp.get(
+            self.full_url(self.app.reverse('veggies_definition'))
+        )
+
+        self.assertEqual(resp.status, 200)
+        jr = yield from resp.json()
+
+        self.assertEqual(jr['description'], 'A HTTP resource of veggies')
         resp.close()
 
     @asynctest

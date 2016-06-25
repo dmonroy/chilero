@@ -5,7 +5,6 @@ from functools import wraps
 from aiohttp import hdrs, web
 from aiohttp.web_urldispatcher import AbstractRoute
 from chilero.web.resource import Resource
-from chilero.web.response import JSONResponse
 
 
 class Application(web.Application):
@@ -26,14 +25,6 @@ class Application(web.Application):
             return getattr(
                 cls(request, self, *args, parent=parent, **kwargs), method
             )(**vkwargs)
-
-        return f
-
-    def definition_dispatcher(self, cls):
-        @asyncio.coroutine
-        def f(request, *args, **kwargs):
-            headers = (('Access-Control-Allow-Origin', '*'),)
-            return JSONResponse(cls.definition, headers=headers)
 
         return f
 
@@ -66,9 +57,7 @@ class Application(web.Application):
                 self.router.add_route(
                     'GET',
                     definition_pattern,
-                    self.definition_dispatcher(
-                        view
-                    ),
+                    self.dispatcher(view, 'resource_definition'),
                     name=definition_url_name
                 )
 

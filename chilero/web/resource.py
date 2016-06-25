@@ -154,6 +154,10 @@ class Resource(View):
                 )
             )
 
+    def resource_definition(self, **kwargs):
+        definition = getattr(self, 'definition', {})
+        return JSONResponse(definition)
+
 
 class ResourceResponse(JSONResponse):
 

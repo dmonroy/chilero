@@ -143,7 +143,7 @@ class Resource(View):
     def get_parent(self):
         """Returns the url to the parent endpoint."""
         if self.is_entity():
-            return self.get_index_url()
+            return self.get_index_url(**self.default_kwargs_for_urls())
         elif self._parent is not None:
             resource = self._parent.rsplit('_', 1)[0]
             parts = self.default_kwargs_for_urls()

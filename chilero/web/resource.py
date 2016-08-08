@@ -84,10 +84,13 @@ class Resource(View):
 
     def get_self_url(self):
         resource = self.get_resource_name()
-        return self.get_index_url(resource) if self.is_collection() \
+        return self.get_index_url(
+            resource,
+            **self.default_kwargs_for_urls()) if self.is_collection() \
             else self.get_object_url(
-                self.request.match_info.get('id', None), resource
-            )
+            self.request.match_info.get('id', None),
+            resource, **self.default_kwargs_for_urls()
+        )
 
     def get_encoder_class(self):
         return getattr(self, 'encoder_class', None)
@@ -140,7 +143,7 @@ class Resource(View):
     def get_parent(self):
         """Returns the url to the parent endpoint."""
         if self.is_entity():
-            return self.get_index_url()
+            return self.get_index_url(**self.default_kwargs_for_urls())
         elif self._parent is not None:
             resource = self._parent.rsplit('_', 1)[0]
             parts = self.default_kwargs_for_urls()

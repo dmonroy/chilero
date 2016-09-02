@@ -16,6 +16,6 @@ class View(object):
                 self.request.scheme, self.request.host, path
             )
 
-        base = base[1:] if path.startswith('/') else base
+        path = path[1:] if path.startswith('/') else path
 
         return os.path.join(base, path)

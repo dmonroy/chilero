@@ -8,12 +8,14 @@ class HelloView(web.View):
     def get(self):
         return web.Response('Hello world!')
 
+
 class MultiView(web.View):
 
     def get(self, type):
 
         types = dict(
-            plain=lambda: web.Response('Hello world!'),
+            octet_stream=lambda: web.Response('Hello world!'),
+            plain=lambda: web.Response('Hello world!', content_type='text/plain'),
             html=lambda: web.HTMLResponse('<h1>Hello world!</h1>'),
             json=lambda: web.JSONResponse(dict(hello='world!')),
             javascript=lambda: web.JavaScriptResponse('// hello world!'),
@@ -42,7 +44,8 @@ class TestWeb(WebTestCase):
     def test_multi_view(self):
 
         types = dict(
-            plain=[None, 'Hello world!'],
+            octet_stream=['application/octet-stream', 'Hello world!'],
+            plain=['text/plain', 'Hello world!'],
             html=['text/html', '<h1>Hello world!</h1>'],
             javascript=['application/javascript', '// hello world!'],
             json=['text/json', '{"hello": "world!"}']

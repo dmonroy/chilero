@@ -3,7 +3,6 @@ import os
 from functools import wraps
 
 from aiohttp import hdrs, web
-from aiohttp.web_urldispatcher import AbstractRoute
 from chilero.web.resource import Resource
 
 
@@ -131,7 +130,7 @@ class Application(web.Application):
                 else view.__name__.lower()
 
             # HTTP methods as lowercase view methods
-            for method in AbstractRoute.METHODS:
+            for method in hdrs.METH_ALL | {hdrs.METH_ANY}:
                 if callable(getattr(view, method.lower(), None)):
                     # Do not bind the same method twice
 

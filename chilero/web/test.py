@@ -3,7 +3,7 @@ import socket
 import unittest
 from functools import wraps
 
-from aiohttp import log
+from aiohttp import ClientSession, log
 from chilero import web
 
 
@@ -34,12 +34,14 @@ class WebTestCase(unittest.TestCase):
 
         @asyncio.coroutine
         def go():
+            self.sess = ClientSession()
             self.app = yield from self.initialize_application()
             yield from self.create_server()
 
         self.loop.run_until_complete(go())
 
     def tearDown(self):
+        self.sess.close()
         self.app.shutdown()
         self.loop.close()
 

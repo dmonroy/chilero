@@ -36,7 +36,6 @@ class TestWeb(WebTestCase):
         resp = yield from request(
             'GET',self.full_url('/hello'),loop=self.loop
         )
-        print(dir(resp))
         self.assertEqual(resp.status, 200)
 
 
@@ -48,7 +47,7 @@ class TestWeb(WebTestCase):
             plain=['text/plain', 'Hello world!'],
             html=['text/html', '<h1>Hello world!</h1>'],
             javascript=['application/javascript', '// hello world!'],
-            json=['text/json', '{"hello": "world!"}']
+            json=['application/json', '{"hello": "world!"}']
         )
 
         for t in types.keys():

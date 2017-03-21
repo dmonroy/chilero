@@ -40,7 +40,7 @@ class WebTestCase(unittest.TestCase):
         self.loop.run_until_complete(go())
 
     def tearDown(self):
-        self.app.finish()
+        self.app.shutdown()
         self.loop.close()
 
     @asyncio.coroutine

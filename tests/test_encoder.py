@@ -42,7 +42,7 @@ class TestEncoder(WebTestCase):
 
     @asynctest
     def test_resource(self):
-        resp = yield from aiohttp.get(self.full_url('/resource'))
+        resp = yield from self.sess.get(self.full_url('/resource'))
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()
@@ -51,7 +51,7 @@ class TestEncoder(WebTestCase):
 
     @asynctest
     def test_view(self):
-        resp = yield from aiohttp.get(self.full_url('/view'))
+        resp = yield from self.sess.get(self.full_url('/view'))
 
         self.assertEqual(resp.status, 200)
         jr = yield from resp.json()

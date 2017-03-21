@@ -128,7 +128,7 @@ class TestResource(WebTestCase):
 
     @asynctest
     def test_definition_from_property(self):
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_definition'))
         )
 
@@ -140,7 +140,7 @@ class TestResource(WebTestCase):
 
     @asynctest
     def test_definition_from_method(self):
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('veggies_definition'))
         )
 
@@ -152,7 +152,7 @@ class TestResource(WebTestCase):
 
     @asynctest
     def test_index(self):
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_index'))
         )
 
@@ -165,7 +165,7 @@ class TestResource(WebTestCase):
 
     @asynctest
     def test_show(self):
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_item', id='orange'))
         )
 
@@ -177,7 +177,7 @@ class TestResource(WebTestCase):
 
         self.assertTrue(jr['self'].endswith('/fruit/orange'))
 
-        resp2 = yield from aiohttp.get(
+        resp2 = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_item', id='mango'))
         )
 
@@ -187,7 +187,7 @@ class TestResource(WebTestCase):
     @asynctest
     def test_new(self):
 
-        resp = yield from aiohttp.post(
+        resp = yield from self.sess.post(
             self.full_url(self.app.reverse('fruit_index')),
             data=json.dumps(dict(name='apple', colors=['red', 'green'])),
         )
@@ -195,7 +195,7 @@ class TestResource(WebTestCase):
         self.assertEqual(resp.status, 200)
 
         resp.close()
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_item', id='apple'))
         )
 
@@ -207,7 +207,7 @@ class TestResource(WebTestCase):
     @asynctest
     def test_update(self):
 
-        resp = yield from aiohttp.post(
+        resp = yield from self.sess.post(
             self.full_url(self.app.reverse('fruit_index')),
             data=json.dumps(dict(name='pear', colors=['green'])),
         )
@@ -215,7 +215,7 @@ class TestResource(WebTestCase):
         self.assertEqual(resp.status, 200)
         resp.close()
 
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_item', id='pear'))
         )
 
@@ -224,7 +224,7 @@ class TestResource(WebTestCase):
         self.assertEqual(jr['body'], dict(colors=['green']))
         resp.close()
 
-        resp = yield from aiohttp.put(
+        resp = yield from self.sess.put(
             self.full_url(self.app.reverse('fruit_item', id='pear')),
             data=json.dumps(dict(colors=['green', 'yellow'])),
         )
@@ -232,7 +232,7 @@ class TestResource(WebTestCase):
         self.assertEqual(resp.status, 200)
         resp.close()
 
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_item', id='pear'))
         )
 
@@ -244,7 +244,7 @@ class TestResource(WebTestCase):
     @asynctest
     def test_delete(self):
 
-        resp = yield from aiohttp.post(
+        resp = yield from self.sess.post(
             self.full_url(self.app.reverse('fruit_index')),
             data=json.dumps(dict(name='grape', colors=['purple'])),
         )
@@ -252,7 +252,7 @@ class TestResource(WebTestCase):
         self.assertEqual(resp.status, 200)
         resp.close()
 
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_item', id='grape'))
         )
 
@@ -262,14 +262,14 @@ class TestResource(WebTestCase):
         self.assertEqual(jr['body'], dict(colors=['purple']))
         resp.close()
 
-        resp = yield from aiohttp.delete(
+        resp = yield from self.sess.delete(
             self.full_url(self.app.reverse('fruit_item', id='grape'))
         )
 
         self.assertEqual(resp.status, 200)
         resp.close()
 
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(self.app.reverse('fruit_item', id='grape'))
         )
 
@@ -278,7 +278,7 @@ class TestResource(WebTestCase):
 
     @asynctest
     def test_parent_url(self):
-        resp = yield from aiohttp.get(
+        resp = yield from self.sess.get(
             self.full_url(
                 self.app.reverse('singlestatsresource_index', fruit_id='orange')
             )
@@ -288,7 +288,7 @@ class TestResource(WebTestCase):
         resp.close()
         assert j['parent'].endswith('/fruit/orange')
 
-        resp2 = yield from aiohttp.get(
+        resp2 = yield from self.sess.get(
             self.full_url(
                 self.app.reverse('globalstatsresource_index')
             )
@@ -297,7 +297,7 @@ class TestResource(WebTestCase):
         resp2.close()
         assert j2['parent'].endswith('/fruit')
 
-        resp2 = yield from aiohttp.get(
+        resp2 = yield from self.sess.get(
             self.full_url(
                 self.app.reverse('viewbasedstats')
             )

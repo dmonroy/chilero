@@ -24,7 +24,7 @@ class JSONResponse(Response):
     def __init__(self, data, cls=None, **kwargs):
         super(JSONResponse, self).__init__(
             body=json.dumps(data, indent=4, cls=cls),
-            content_type='text/json', **kwargs
+            content_type='application/json', **kwargs
         )
 
 
